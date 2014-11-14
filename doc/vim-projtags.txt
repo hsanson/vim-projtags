@@ -1,0 +1,187 @@
+*vim-projtags.txt*    For Vim version 7.0    Last change: 2014 Nov 14
+
+Author:         Horacio Sanson
+Licence:        Vim licence, see |license|
+Homepage:       https://github.com/hsanson/vim-projtags
+Version:        1.2.0
+
+==============================================================================
+Contents                                  *vim-projtags* *vim-projtags-contents*
+
+         1. Intro ........................... |vim-projtags-intro|
+         2. Installation .................... |vim-projtags-installation|
+         3. Usage ........................... |vim-projtags-usage|
+         4. Commands ........................ |vim-projtags-commands|
+         5. Configuration ................... |vim-projtags-configuration|
+
+==============================================================================
+1. Intro                                                    *vim-projtags-intro*
+
+There are several plugins for automatic generation of tags (e.g. easytags,
+tags.vim, gutentags) but they are limited to the current file or project
+scope. Usually programming projects involve far more than the project source
+and include external libraries, SDKs, etc.
+
+This vim-plugin allows you to define source libraries associated to a name and
+provides commands to generate and load tags for all sources defied in those
+libraries.
+
+For example imagine you are developing an Android application that uses the
+retrofit and otto libraries. You may want to have tags generated for the
+retrofit, otto and android sdk source files. Using this plugin you can put in
+your vimrc the following:
+
+       call projtags#add("myProject", "/path/to/retrofit/src")
+       call projtags#add("myProject", "/path/to/otto/src")
+       call projtags#add("myProject", "/path/to/android-sdk/sources/android-21")
+
+With the *projtags#add()* function you can register different source
+directories with a project called *myProject*. After registering the sources
+you can generate the tag files for all sources with a single command:
+
+        ProjTagsGen "myProject"
+
+Once the tags are generated you can load them to the &tags variable with:
+
+        ProjTagsLoad "myProject"
+
+The above command will add all the tag files associated to the *myProject*
+project into the &tags variable. This enables tag navigation and auto-complete
+for the sources.
+
+==============================================================================
+2. Installation                                     *vim-projtags-installation*
+
+It is recommended that you use a package manager like Pathogen or Vundle to
+install this plugin. In the case of Vundle all you have to do is add this
+line to your vimrc:
+>
+       Bundle 'hsanson/vim-projtags'
+<
+and then inside vim run the |:BundleInstall| command.
+
+==============================================================================
+3. Usage                                                   *vim-projtags-usage*
+
+Before using this plugin you must have access to the source code of the
+libraries/SDKs you want to include. Most good libraries are opensource and can
+be downloaded to your local machine from github or googlecode, etc.
+
+There are other sources that you may be interested like the linux kernel when
+programming linux applications, the android SDK source for developing android
+applications or the java SDK source for when developing java applications.
+
+3.1 Android Sources
+
+If you are developing an android application you can download the android SDK source using the *android* tool that comes with the SDK. Ensure you download the source for the android API version you are targeting.
+
+Usually the downloaded sources are installed in *<android-sdk>/sources*  where *<android-sdk>* is the absolute path where you installed the android-sdk. Assuming you are targeting API version 18 in your application you should add the source path as below:
+
+        call projtags#add('myApp', '<android-sdk>/sources/android-18')
+
+then you can use the *ProjTagsGen* and *ProjTagsLoad*  commands to generate
+and load the tags for the android SDK.
+
+3.2 Java Sources
+
+If you are developing a java application then you may want to add also the
+java sources. If you are using the Oracle java SDK:
+
+        cd /<oracle-sdk-path/src
+        unzip src.zip
+
+the *oracle-sdk-path* is the absolute path were you installed the Oracle SDK.
+
+If you are using the openjdk that comes packaged in Debian systems then follow
+these steps to get the source:
+
+        sudo apt-get install openjdk-7-source
+        mkdir $HOME/sources/openjdk
+        sudo unzip -d $HOME/sources/openjdk /usr/lib/jvm/openjdk-7/src.zip
+
+make sure you change the destination folder *$HOME/sources/openjdk* to fit
+your file structure.
+
+3.3 Linux kernel sources
+
+If you are developing C/C++ applications in Linux you may need to add the
+kernel sources:
+
+        sudo apt-get install linux-headers-`uname -r`
+
+Note that the above command installs the sources for the currently running
+kernel version. If you wish another version you need to put the full package
+name.
+
+The sources get installed into */usr/src* so browse it and add the path of the
+kernel version you want using the projtags#add() function.
+
+3.4 Ruby
+
+When developing ruby or rails applications having the rails tags can be
+useful. Depending on the version of ruby you want you have to set the
+corresponding path from the */usr/lib/ruby* folder:
+
+        call projtags#add("myRailsApp", "/usr/lib/ruby/2.1.0")
+
+do not put only the */usr/lib/ruby* as this would create tags for all ruby
+versions installed in the system and all versions of installed gems creating a
+lot of duplicate tags. Try to be specific setting the ruby version.
+
+3.5 Gems
+
+Most ruby and rails applications make use of specific gems at specific
+versions.
+
+     bundle show --paths
+
+------------------------------------------------------------------------------
+4. Commands                                                 *vim-projtags-commands*
+
+:ProjTagsAdd <name> <path>                                        *:ProjTagsAdd*
+    Registers source path <path> with project named <name>.
+
+:ProjTagsGen <name>                                               *:ProjTagsGen*
+    Generates tags files for all source paths registered with project named
+    <name>.
+
+:ProjTagsLoad <name>                                             *:ProjTagsLoad*
+    Add the tags files for project <name> into the &tags variable. This allows
+    tag navigation on all sources registered with that project.
+
+:ProjTagsUnload <name>                                         *:ProjTagsUnload*
+    Removes the tags files for project <name> from the &tags variable.
+
+==============================================================================
+5. Configuration                                     *vim-projtags-configuration*
+
+                                                                 *g:projtags_bin*
+g:projtags_bin~
+Default: ctags
+
+The ctags binary to use for generating tags.
+
+                                                               *g:projtags_path*
+g:projtags_path
+Default: $HOME/.tags/
+
+Path where tag files are stored.
+
+                                                                *projtags#add()*
+projtags#add()
+
+Command used to register source paths with projects:
+
+        call projtags#add("MyProjectName", "/path/src")
+        call projtags#add("MyProjectName", "/path2/src")
+        call projtags#add("MyAndroidApp", "/android-sdk/sources/android-21")
+
+the example above associates two source paths with "MyProjectName" and the
+android SDK with "MyAndroidApp". Once the sources are registered then you can
+generate the tags and load them when developing any of those projects:
+
+        :ProjTagsGen MyProjectName
+        :ProjTagsLoad MyProjectName
+
+==============================================================================
+ vim: tw=78 ts=8 sw=4 sts=4 et ft=help
