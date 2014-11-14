@@ -13,6 +13,7 @@ Contents                                  *vim-projtags* *vim-projtags-contents*
          3. Usage ........................... |vim-projtags-usage|
          4. Commands ........................ |vim-projtags-commands|
          5. Configuration ................... |vim-projtags-configuration|
+         6. Sources     ..................... |vim-sources-configuration|
 
 ==============================================================================
 1. Intro                                                    *vim-projtags-intro*
@@ -27,27 +28,49 @@ provides commands to generate and load tags for all sources defied in those
 libraries.
 
 For example imagine you are developing an Android application that uses the
-retrofit and otto libraries. You may want to have tags generated for the
-retrofit, otto and android sdk source files. Using this plugin you can put in
-your vimrc the following:
+retrofit and otto libraries and you want to be able to jump to the source
+definitions of classes and methods of those libraries using tags navigation.
+In this case simply add the following to your vimrc file:
 
-       call projtags#add("myProject", "/path/to/retrofit/src")
-       call projtags#add("myProject", "/path/to/otto/src")
-       call projtags#add("myProject", "/path/to/android-sdk/sources/android-21")
+        let g:projtags_list = {
+              \ 'myAndroidApp': [
+              \     '~/sources/java/otto',
+              \     '~/sources/java/google-gson-read-only',
+              \     '~/sources/java/realm-java',
+              \     '~/sources/java/retrofit',
+              \     '~/Apps/android-sdk/sources/android-21'
+              \     ]
+              \ }
 
-With the *projtags#add()* function you can register different source
-directories with a project called *myProject*. After registering the sources
-you can generate the tag files for all sources with a single command:
+The *g:projtags_list* variable is a dictionary where the key is the project
+name and the value is an array of string paths for each source directory you
+want to register with the project.
 
-        ProjTagsGen "myProject"
+With this variable set you can then use the *PojTagsGen* command to generate
+all tags files for the sources associated with the project:
 
-Once the tags are generated you can load them to the &tags variable with:
+        ProjTagsGen "myAndroidApp"
 
-        ProjTagsLoad "myProject"
+Then you can load and unload the tags any time using the *ProjTagsLoad* and
+*ProjTagsUnload* commands respectively:
 
-The above command will add all the tag files associated to the *myProject*
-project into the &tags variable. This enables tag navigation and auto-complete
-for the sources.
+        ProjTagsLoad "myAndroiApp"
+        ProjTagsUnload "myAndroidApp"
+
+You can hava as many pre-defined projects as you wish and load/unload them at
+will depending on the project you are currently working on:
+
+        let g:projtags_list = {
+              \ 'java7': ['/home/ryujin/Apps/jdk/src'],
+              \ 'android': [
+              \     '~/sources/java/otto',
+              \     '~/sources/java/google-gson-read-only',
+              \     '~/sources/java/realm-java',
+              \     '~/sources/java/retrofit',
+              \     '~/android-sdk/sources/android-21'
+              \ ],
+              \ 'kernel': ['/usr/src/linux-kbuild-3.1']
+              \ }
 
 ==============================================================================
 2. Installation                                     *vim-projtags-installation*
@@ -71,69 +94,36 @@ There are other sources that you may be interested like the linux kernel when
 programming linux applications, the android SDK source for developing android
 applications or the java SDK source for when developing java applications.
 
-3.1 Android Sources
+Once you have all sources downloaded locally to you machine simply set the
+*g:projtags_list* variable to associate each source to any of your projects:
 
-If you are developing an android application you can download the android SDK source using the *android* tool that comes with the SDK. Ensure you download the source for the android API version you are targeting.
+        let g:projtags_list = {
+              \ 'java7': ['/home/ryujin/Apps/jdk/src'],
+              \ 'androidApp1': [
+              \     '~/sources/java/otto',
+              \     '~/sources/java/google-gson-read-only',
+              \     '~/sources/java/realm-java',
+              \     '~/sources/java/retrofit',
+              \     '~/android-sdk/sources/android-21'
+              \ ],
+              \ 'androidApp2': [
+              \     '~/sources/java/otto',
+              \     '~/sources/java/google-gson-read-only',
+              \     '~/sources/java/realm-java',
+              \     '~/sources/java/retrofit',
+              \     '~/android-sdk/sources/android-18'
+              \ ],
+              \ 'kernel': ['/usr/src/linux-kbuild-3.1']
+              \ }
 
-Usually the downloaded sources are installed in *<android-sdk>/sources*  where *<android-sdk>* is the absolute path where you installed the android-sdk. Assuming you are targeting API version 18 in your application you should add the source path as below:
+You can have the same source path in several different projects. For example
+you have two android applications that use the same libraries but target
+different android API versions. The plugin keeps a separate tag file per
+source path so the shared paths won't generate two different tag files.
 
-        call projtags#add('myApp', '<android-sdk>/sources/android-18')
-
-then you can use the *ProjTagsGen* and *ProjTagsLoad*  commands to generate
-and load the tags for the android SDK.
-
-3.2 Java Sources
-
-If you are developing a java application then you may want to add also the
-java sources. If you are using the Oracle java SDK:
-
-        cd /<oracle-sdk-path/src
-        unzip src.zip
-
-the *oracle-sdk-path* is the absolute path were you installed the Oracle SDK.
-
-If you are using the openjdk that comes packaged in Debian systems then follow
-these steps to get the source:
-
-        sudo apt-get install openjdk-7-source
-        mkdir $HOME/sources/openjdk
-        sudo unzip -d $HOME/sources/openjdk /usr/lib/jvm/openjdk-7/src.zip
-
-make sure you change the destination folder *$HOME/sources/openjdk* to fit
-your file structure.
-
-3.3 Linux kernel sources
-
-If you are developing C/C++ applications in Linux you may need to add the
-kernel sources:
-
-        sudo apt-get install linux-headers-`uname -r`
-
-Note that the above command installs the sources for the currently running
-kernel version. If you wish another version you need to put the full package
-name.
-
-The sources get installed into */usr/src* so browse it and add the path of the
-kernel version you want using the projtags#add() function.
-
-3.4 Ruby
-
-When developing ruby or rails applications having the rails tags can be
-useful. Depending on the version of ruby you want you have to set the
-corresponding path from the */usr/lib/ruby* folder:
-
-        call projtags#add("myRailsApp", "/usr/lib/ruby/2.1.0")
-
-do not put only the */usr/lib/ruby* as this would create tags for all ruby
-versions installed in the system and all versions of installed gems creating a
-lot of duplicate tags. Try to be specific setting the ruby version.
-
-3.5 Gems
-
-Most ruby and rails applications make use of specific gems at specific
-versions.
-
-     bundle show --paths
+After setting the variable you need to run the *ProjTagsGen* at least once to
+generate the tag files and then you can use the *ProjTagAdd* to load the tag
+files while working on a project.
 
 ------------------------------------------------------------------------------
 4. Commands                                                 *vim-projtags-commands*
@@ -155,6 +145,36 @@ versions.
 ==============================================================================
 5. Configuration                                     *vim-projtags-configuration*
 
+                                                                 *g:projtags_list*
+g:projtags_list~
+Default: {}
+
+This is the only important variable you need to set in order to use the
+plugin. This is a dictionary where the keys are project names and the values
+are arrays of strings that represent the source paths associated with the
+corresponding project.
+
+Example:
+
+        let g:projtags_list = {
+              \ 'java7': ['/home/ryujin/Apps/jdk/src'],
+              \ 'androidApp1': [
+              \     '~/sources/java/otto',
+              \     '~/sources/java/google-gson-read-only',
+              \     '~/sources/java/realm-java',
+              \     '~/sources/java/retrofit',
+              \     '~/android-sdk/sources/android-21'
+              \ ],
+              \ 'androidApp2': [
+              \     '~/sources/java/otto',
+              \     '~/sources/java/google-gson-read-only',
+              \     '~/sources/java/realm-java',
+              \     '~/sources/java/retrofit',
+              \     '~/android-sdk/sources/android-18'
+              \ ],
+              \ 'kernel': ['/usr/src/linux-kbuild-3.1']
+              \ }
+
                                                                  *g:projtags_bin*
 g:projtags_bin~
 Default: ctags
@@ -167,21 +187,74 @@ Default: $HOME/.tags/
 
 Path where tag files are stored.
 
-                                                                *projtags#add()*
-projtags#add()
+==============================================================================
+6. Configuration                                     *vim-projtags-sources*
 
-Command used to register source paths with projects:
+Here are some tips on ways to get the sources needed to generate tags.
 
-        call projtags#add("MyProjectName", "/path/src")
-        call projtags#add("MyProjectName", "/path2/src")
-        call projtags#add("MyAndroidApp", "/android-sdk/sources/android-21")
+6.1 Android Sources
 
-the example above associates two source paths with "MyProjectName" and the
-android SDK with "MyAndroidApp". Once the sources are registered then you can
-generate the tags and load them when developing any of those projects:
+If you are developing an android application you can download the android SDK source using the *android* tool that comes with the SDK. Ensure you download the source for the android API version you are targeting.
 
-        :ProjTagsGen MyProjectName
-        :ProjTagsLoad MyProjectName
+Usually the downloaded sources are installed in *<android-sdk>/sources*  where *<android-sdk>* is the absolute path where you installed the android-sdk. Assuming you are targeting API version 18 in your application you should add the source path as below:
+
+        call projtags#add('myApp', '<android-sdk>/sources/android-18')
+
+then you can use the *ProjTagsGen* and *ProjTagsLoad*  commands to generate
+and load the tags for the android SDK.
+
+6.2 Java Sources
+
+If you are developing a java application then you may want to add also the
+java sources. If you are using the Oracle java SDK:
+
+        cd /<oracle-sdk-path/src
+        unzip src.zip
+
+the *oracle-sdk-path* is the absolute path were you installed the Oracle SDK.
+
+If you are using the openjdk that comes packaged in Debian systems then follow
+these steps to get the source:
+
+        sudo apt-get install openjdk-7-source
+        mkdir $HOME/sources/openjdk
+        sudo unzip -d $HOME/sources/openjdk /usr/lib/jvm/openjdk-7/src.zip
+
+make sure you change the destination folder *$HOME/sources/openjdk* to fit
+your file structure.
+
+6.3 Linux kernel sources
+
+If you are developing C/C++ applications in Linux you may need to add the
+kernel sources:
+
+        sudo apt-get install linux-headers-`uname -r`
+
+Note that the above command installs the sources for the currently running
+kernel version. If you wish another version you need to put the full package
+name.
+
+The sources get installed into */usr/src* so browse it and add the path of the
+kernel version you want using the projtags#add() function.
+
+6.4 Ruby
+
+When developing ruby or rails applications having the rails tags can be
+useful. Depending on the version of ruby you want you have to set the
+corresponding path from the */usr/lib/ruby* folder:
+
+        call projtags#add("myRailsApp", "/usr/lib/ruby/2.1.0")
+
+do not put only the */usr/lib/ruby* as this would create tags for all ruby
+versions installed in the system and all versions of installed gems creating a
+lot of duplicate tags. Try to be specific setting the ruby version.
+
+6.5 Gems
+
+Most ruby and rails applications make use of specific gems at specific
+versions.
+
+     bundle show --paths
 
 ==============================================================================
  vim: tw=78 ts=8 sw=4 sts=4 et ft=help

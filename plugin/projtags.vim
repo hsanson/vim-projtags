@@ -31,10 +31,12 @@ if !isdirectory(g:projtags_path)
   call mkdir(g:projtags_path, "p")
 endif
 
-let s:projtags_list = {}
+if !exists('g:projtags_list')
+  let g:projtags_list = {}
+endif
 
 function! s:getTagName(path)
-  return substitute(substitute(a:path, '/', '', ''), '/', '-', 'g')
+  return substitute(substitute(expand(a:path), '/', '', ''), '/', '-', 'g')
 endfunction
 
 function! s:getTagFileName(path)
@@ -43,10 +45,10 @@ endfunction
 
 " Returns the list of source paths associated with project a:name
 function! s:getSourcePaths(name)
-  if !has_key(s:projtags_list, a:name)
-    let s:projtags_list[a:name] = []
+  if !has_key(g:projtags_list, a:name)
+    let g:projtags_list[a:name] = []
   endif
-  return s:projtags_list[a:name]
+  return g:projtags_list[a:name]
 endfunction
 
 function! projtags#add(name, path)
@@ -78,8 +80,10 @@ function! projtags#gen(name)
   endif
   echomsg 'ProjTags: generating tags for "' . a:name '", please wait...'
   for i in l:list
-    let l:cmd = g:projtags_bin . ' -R -f ' . s:getTagFileName(i) . ' --c++-kinds=+p --fields=+iaS --extra=+q ' . i
-    call system(l:cmd)
+    if isdirectory(expand(i))
+      let l:cmd = g:projtags_bin . ' -R -f ' . s:getTagFileName(i) . ' --c++-kinds=+p --fields=+iaS --extra=+q ' . expand(i)
+      call system(l:cmd)
+    endif
   endfor
   redraw
   echomsg 'ProjTags: generating tags for "' . a:name '" finished.'
@@ -139,4 +143,4 @@ endfunction
 command! -nargs=* ProjTagsAdd call projtags#add(<f-args>)
 command! -nargs=1 ProjTagsGen call projtags#gen(<f-args>)
 command! -nargs=1 ProjTagsLoad call projtags#load(<f-args>)
-command! -nargs=1 ProjTagsUnload call projtags#unload(<f-args>)
+command! -nargs=1 ProjTagsUnload call projtag)s#unload(<f-args>)
