@@ -42,7 +42,7 @@ In this case simply add the following to your vimrc file:
               \     ]
               \ }
 
-The *g:projtags_list* variable is a dictionary where the key is the project
+The g:projtags_list variable is a dictionary where the key is the project
 name and the value is an array of string paths for each source directory you
 want to register with the project.
 
@@ -51,7 +51,7 @@ all tags files for the sources associated with the project:
 
         ProjTagsGen "myAndroidApp"
 
-Then you can load and unload the tags any time using the *ProjTagsLoad* and
+Then you can load and unload the tags any time using the ProjTagsLoad and
 *ProjTagsUnload* commands respectively:
 
         ProjTagsLoad "myAndroiApp"
@@ -95,7 +95,7 @@ programming linux applications, the android SDK source for developing android
 applications or the java SDK source for when developing java applications.
 
 Once you have all sources downloaded locally to you machine simply set the
-*g:projtags_list* variable to associate each source to any of your projects:
+g:projtags_list variable to associate each source to any of your projects:
 
         let g:projtags_list = {
               \ 'java7': ['/home/ryujin/Apps/jdk/src'],
@@ -121,8 +121,8 @@ you have two android applications that use the same libraries but target
 different android API versions. The plugin keeps a separate tag file per
 source path so the shared paths won't generate two different tag files.
 
-After setting the variable you need to run the *ProjTagsGen* at least once to
-generate the tag files and then you can use the *ProjTagAdd* to load the tag
+After setting the variable you need to run the ProjTagsGen at least once to
+generate the tag files and then you can use the ProjTagAdd to load the tag
 files while working on a project.
 
 ------------------------------------------------------------------------------
@@ -200,7 +200,7 @@ Usually the downloaded sources are installed in *<android-sdk>/sources*  where *
 
         call projtags#add('myApp', '<android-sdk>/sources/android-18')
 
-then you can use the *ProjTagsGen* and *ProjTagsLoad*  commands to generate
+then you can use the ProjTagsGen and ProjTagsLoad  commands to generate
 and load the tags for the android SDK.
 
 6.2 Java Sources
@@ -241,11 +241,11 @@ kernel version you want using the projtags#add() function.
 
 When developing ruby or rails applications having the rails tags can be
 useful. Depending on the version of ruby you want you have to set the
-corresponding path from the */usr/lib/ruby* folder:
+corresponding path from the /usr/lib/ruby folder:
 
         call projtags#add("myRailsApp", "/usr/lib/ruby/2.1.0")
 
-do not put only the */usr/lib/ruby* as this would create tags for all ruby
+do not put only the /usr/lib/ruby as this would create tags for all ruby
 versions installed in the system and all versions of installed gems creating a
 lot of duplicate tags. Try to be specific setting the ruby version.
 
