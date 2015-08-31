@@ -57,7 +57,7 @@ Then you can load and unload the tags any time using the ProjTagsLoad and
         ProjTagsLoad "myAndroiApp"
         ProjTagsUnload "myAndroidApp"
 
-You can hava as many pre-defined projects as you wish and load/unload them at
+You can have as many pre-defined projects as you wish and load/unload them at
 will depending on the project you are currently working on:
 
         let g:projtags_list = {
@@ -194,9 +194,14 @@ Here are some tips on ways to get the sources needed to generate tags.
 
 6.1 Android Sources
 
-If you are developing an android application you can download the android SDK source using the *android* tool that comes with the SDK. Ensure you download the source for the android API version you are targeting.
+If you are developing an android application you can download the android SDK
+source using the *android* tool that comes with the SDK. Ensure you download the
+ source for the android API version you are targeting.
 
-Usually the downloaded sources are installed in *<android-sdk>/sources*  where *<android-sdk>* is the absolute path where you installed the android-sdk. Assuming you are targeting API version 18 in your application you should add the source path as below:
+Usually the downloaded sources are installed in *<android-sdk>/sources* where
+*<android-sdk>* is the absolute path where you installed the android-sdk.
+Assuming you are targeting API version 18 in your application you should add 
+the source path as below:
 
         call projtags#add('myApp', '<android-sdk>/sources/android-18')
 
